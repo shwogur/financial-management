@@ -9,6 +9,10 @@ import java.io.StringReader;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.example.domain.Account;
+import org.example.domain.AccountCode;
+import org.example.domain.AccountType;
+
 class InputViewTest {
 
     private static InputView inputViewOf(String input) {
@@ -55,5 +59,41 @@ class InputViewTest {
         inputView.readLine();
 
         assertThrows(InputEndedException.class, inputView::readLine);
+    }
+
+    @Test
+    @DisplayName("한 줄을 읽어 항목 이름에 맞게 계정으로 변환한다")
+    void readsAccount() {
+        InputView inputView = inputViewOf(" 001 , 보통 예금 , 자산 \n");
+
+        Account account = inputView.readAccount();
+
+        assertEquals(new AccountCode("001"), account.code());
+        assertEquals("보통 예금", account.name());
+        assertEquals(AccountType.ASSET, account.type());
+    }
+
+    @Test
+    @DisplayName("계정 입력의 항목 개수가 맞지 않으면 거절한다")
+    void rejectsAccountWithWrongItemCount() {
+        InputView inputView = inputViewOf("101,현금\n");
+
+        assertThrows(IllegalArgumentException.class, inputView::readAccount);
+    }
+
+    @Test
+    @DisplayName("계정 입력의 값이 업무 규칙에 맞지 않으면 거절한다")
+    void rejectsAccountWithInvalidValue() {
+        InputView inputView = inputViewOf("101,현금,자본\n");
+
+        assertThrows(IllegalArgumentException.class, inputView::readAccount);
+    }
+
+    @Test
+    @DisplayName("계정 입력 중 입력이 끝나면 입력 종료 예외를 던진다")
+    void throwsWhenInputEndsWhileReadingAccount() {
+        InputView inputView = inputViewOf("");
+
+        assertThrows(InputEndedException.class, inputView::readAccount);
     }
 }

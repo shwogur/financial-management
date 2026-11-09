@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class AccountingControllerTest {
+class MenuControllerTest {
 
     private static final String MENU = """
             [회계 전표 관리]
@@ -37,7 +37,7 @@ class AccountingControllerTest {
         InputView inputView = new InputView(new BufferedReader(new StringReader(input)));
         OutputView outputView = new OutputView(new PrintStream(buffer, true, StandardCharsets.UTF_8));
 
-        new AccountingController(inputView, outputView, accounts).run();
+        new MenuController(inputView, outputView, accounts).run();
 
         return buffer.toString(StandardCharsets.UTF_8).replace("\r\n", "\n");
     }
