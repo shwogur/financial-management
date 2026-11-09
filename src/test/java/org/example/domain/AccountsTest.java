@@ -84,4 +84,45 @@ class AccountsTest {
         assertThrows(UnsupportedOperationException.class,
                 () -> all.add(account("101", "현금", AccountType.ASSET)));
     }
+
+    @Test
+    @DisplayName("코드로 등록된 계정을 찾는다")
+    void findsAccountByCode() {
+        Account cash = account("101", "현금", AccountType.ASSET);
+        accounts.register(cash);
+        accounts.register(account("201", "차입금", AccountType.LIABILITY));
+
+        assertEquals(cash, accounts.findByCode(new AccountCode("101")));
+    }
+
+    @Test
+    @DisplayName("등록되지 않은 코드로 찾으면 거절한다")
+    void rejectsUnregisteredCode() {
+        accounts.register(account("101", "현금", AccountType.ASSET));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> accounts.findByCode(new AccountCode("999")));
+    }
+
+    @Test
+    @DisplayName("앞자리 0이 다른 코드는 서로 다른 계정으로 찾는다")
+    void distinguishesLeadingZero() {
+        accounts.register(account("001", "현금", AccountType.ASSET));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> accounts.findByCode(new AccountCode("100")));
+        assertEquals("현금", accounts.findByCode(new AccountCode("001")).name());
+    }
+
+    @Test
+    @DisplayName("등록된 계정 수를 알려주고, 등록에 실패하면 수가 늘지 않는다")
+    void countsRegisteredAccounts() {
+        assertEquals(0, accounts.size());
+
+        accounts.register(account("101", "현금", AccountType.ASSET));
+        assertThrows(IllegalArgumentException.class,
+                () -> accounts.register(account("101", "보통예금", AccountType.ASSET)));
+
+        assertEquals(1, accounts.size());
+    }
 }

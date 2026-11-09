@@ -16,7 +16,19 @@ public class Accounts {
         accountsByCode.put(code, account);
     }
 
+    public Account findByCode(AccountCode code) {
+        Account account = accountsByCode.get(code);
+        if (account == null) {
+            throw new IllegalArgumentException("등록되지 않은 계정 코드입니다. (" + code.value() + ")");
+        }
+        return account;
+    }
+
     public List<Account> findAll() {
         return List.copyOf(accountsByCode.values());
+    }
+
+    public int size() {
+        return accountsByCode.size();
     }
 }
