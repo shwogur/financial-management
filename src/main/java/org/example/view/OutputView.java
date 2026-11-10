@@ -55,6 +55,18 @@ public class OutputView {
                 account.code().value(), account.name(), account.type().displayName()));
     }
 
+    public void printVoucherWritePrompt() {
+        out.println("전표를 입력해 주세요. (거래일자,적요,차변코드,대변코드,금액)");
+    }
+
+    public void printVoucherWritten(int voucherNumber) {
+        out.println("전표가 작성되었습니다. (전표번호: " + voucherNumber + ")");
+    }
+
+    public void printNotEnoughAccountsForVoucher() {
+        printError("전표 작성에는 계정과목이 2개 이상 필요합니다.");
+    }
+
     public void printError(String message) {
         out.println(ERROR_PREFIX + message);
     }

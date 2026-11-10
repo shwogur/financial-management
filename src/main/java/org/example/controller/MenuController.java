@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import org.example.domain.Accounts;
+import org.example.domain.Vouchers;
 import org.example.view.InputEndedException;
 import org.example.view.InputView;
 import org.example.view.OutputView;
@@ -11,12 +12,14 @@ public class MenuController {
     private final OutputView outputView;
     private final RetryHandler retryHandler;
     private final AccountController accountController;
+    private final VoucherController voucherController;
 
-    public MenuController(InputView inputView, OutputView outputView, Accounts accounts) {
+    public MenuController(InputView inputView, OutputView outputView, Accounts accounts, Vouchers vouchers) {
         this.inputView = inputView;
         this.outputView = outputView;
         this.retryHandler = new RetryHandler(outputView);
         this.accountController = new AccountController(inputView, outputView, retryHandler, accounts);
+        this.voucherController = new VoucherController(inputView, outputView, retryHandler, accounts, vouchers);
     }
 
     public void run() {
@@ -45,6 +48,7 @@ public class MenuController {
         switch (menu) {
             case REGISTER_ACCOUNT -> accountController.register();
             case SHOW_ACCOUNTS -> accountController.show();
+            case WRITE_VOUCHER -> voucherController.write();
             default -> outputView.printError("아직 지원하지 않는 메뉴입니다.");
         }
     }

@@ -101,4 +101,36 @@ class OutputViewTest {
 
         assertEquals("프로그램을 종료합니다.\n", output());
     }
+
+    @Test
+    @DisplayName("전표 입력 안내를 지정된 문구로 출력한다")
+    void printsVoucherWritePrompt() {
+        outputView.printVoucherWritePrompt();
+
+        assertEquals("전표를 입력해 주세요. (거래일자,적요,차변코드,대변코드,금액)\n", output());
+    }
+
+    @Test
+    @DisplayName("전표 작성 성공 메시지에 전표번호를 출력한다")
+    void printsVoucherWritten() {
+        outputView.printVoucherWritten(1);
+
+        assertEquals("전표가 작성되었습니다. (전표번호: 1)\n", output());
+    }
+
+    @Test
+    @DisplayName("전표번호는 천 단위 쉼표 없이 출력한다")
+    void printsVoucherNumberWithoutComma() {
+        outputView.printVoucherWritten(1234);
+
+        assertEquals("전표가 작성되었습니다. (전표번호: 1234)\n", output());
+    }
+
+    @Test
+    @DisplayName("계정과목이 부족하면 지정된 오류 문구를 출력한다")
+    void printsNotEnoughAccountsForVoucher() {
+        outputView.printNotEnoughAccountsForVoucher();
+
+        assertEquals("[ERROR] 전표 작성에는 계정과목이 2개 이상 필요합니다.\n", output());
+    }
 }

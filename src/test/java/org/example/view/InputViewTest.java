@@ -2,9 +2,12 @@ package org.example.view;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.example.domain.Account;
 import org.example.domain.AccountCode;
 import org.example.domain.AccountType;
+import org.example.domain.Amount;
 
 class InputViewTest {
 
@@ -95,5 +99,55 @@ class InputViewTest {
         InputView inputView = inputViewOf("");
 
         assertThrows(InputEndedException.class, inputView::readAccount);
+    }
+
+    @Test
+    @DisplayName("한 줄을 읽어 항목 이름에 맞게 전표 입력으로 변환한다")
+    void readsVoucher() {
+        InputView inputView = inputViewOf(" 2026-11-06 , 운영자금 차입 , 101 , 201 , 100000 \n");
+
+        VoucherInput input = inputView.readVoucher();
+
+        assertEquals(new VoucherInput(
+                LocalDate.of(2026, 11, 6),
+                "운영자금 차입",
+                new AccountCode("101"),
+                new AccountCode("201"),
+                new Amount(100_000L)), input);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "2026-11-06,운영자금 차입,101,201",
+            "2026-11-06,운영자금 차입,101,201,100000,",
+            "2026-02-30,운영자금 차입,101,201,100000",
+            "2026-11-06,운영자금 차입,1,201,100000",
+            "2026-11-06,운영자금 차입,101,201,-10000",
+            "2026-11-06,운영자금 차입,101,201,0",
+            "2026-11-06,운영자금 차입,101,201,1000000001"
+    })
+    @DisplayName("전표 입력의 개수, 날짜, 코드 형식, 금액이 잘못되면 거절한다")
+    void rejectsInvalidVoucherInput(String line) {
+        InputView inputView = inputViewOf(line + "\n");
+
+        assertThrows(IllegalArgumentException.class, inputView::readVoucher);
+    }
+
+    @Test
+    @DisplayName("같은 계정 코드 여부는 판단하지 않고 그대로 전달한다")
+    void doesNotJudgeSameAccountCode() {
+        InputView inputView = inputViewOf("2026-11-06,잘못된 전표,101,101,10000\n");
+
+        VoucherInput input = inputView.readVoucher();
+
+        assertEquals(input.debitCode(), input.creditCode());
+    }
+
+    @Test
+    @DisplayName("전표 입력 중 입력이 끝나면 입력 종료 예외를 던진다")
+    void throwsWhenInputEndsWhileReadingVoucher() {
+        InputView inputView = inputViewOf("");
+
+        assertThrows(InputEndedException.class, inputView::readVoucher);
     }
 }
