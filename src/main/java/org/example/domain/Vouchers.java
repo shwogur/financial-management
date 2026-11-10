@@ -14,8 +14,19 @@ public class Vouchers {
         return voucher;
     }
 
+    public Voucher findByNumber(int number) {
+        return writtenVouchers.stream()
+                .filter(voucher -> voucher.number() == number)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 전표번호입니다. (" + number + ")"));
+    }
+
     public List<Voucher> findAll() {
         return List.copyOf(writtenVouchers);
+    }
+
+    public boolean isEmpty() {
+        return writtenVouchers.isEmpty();
     }
 
     private int nextNumber() {

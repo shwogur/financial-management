@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -93,5 +94,43 @@ class VouchersTest {
         List<Voucher> all = vouchers.findAll();
 
         assertThrows(UnsupportedOperationException.class, all::clear);
+    }
+
+    @Test
+    @DisplayName("전표번호로 해당 전표를 찾는다")
+    void findsVoucherByNumber() {
+        writeValid();
+        Voucher second = vouchers.write(DATE, "운영자금 상환", LOAN, CASH, AMOUNT);
+        writeValid();
+
+        assertEquals(second, vouchers.findByNumber(2));
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 전표번호로 찾으면 거절한다")
+    void rejectsUnknownNumber() {
+        writeValid();
+        writeValid();
+
+        assertThrows(IllegalArgumentException.class, () -> vouchers.findByNumber(3));
+    }
+
+    @Test
+    @DisplayName("작성에 실패한 요청의 번호로는 전표를 찾을 수 없다")
+    void cannotFindNumberOfFailedWrite() {
+        assertThrows(IllegalArgumentException.class,
+                () -> vouchers.write(DATE, "같은 계정", CASH, CASH, AMOUNT));
+
+        assertThrows(IllegalArgumentException.class, () -> vouchers.findByNumber(1));
+    }
+
+    @Test
+    @DisplayName("전표가 있는지 알려준다")
+    void tellsWhetherEmpty() {
+        assertTrue(vouchers.isEmpty());
+
+        writeValid();
+
+        assertFalse(vouchers.isEmpty());
     }
 }

@@ -143,4 +143,68 @@ class VoucherControllerTest {
         assertThrows(InputEndedException.class, controller::write);
         assertTrue(vouchers.findAll().isEmpty());
     }
+
+    @Test
+    @DisplayName("작성된 전표 목록을 입력 없이 출력한다")
+    void showsAllVouchers() {
+        registerCashAndLoan();
+        vouchers.write(LocalDate.of(2026, 11, 6), "운영자금 차입",
+                accounts.findByCode(new AccountCode("101")),
+                accounts.findByCode(new AccountCode("201")),
+                new Amount(100_000L));
+
+        controllerWithInput("").showAll();
+
+        assertEquals("""
+                [전표 목록]
+                번호 | 거래일자 | 구분 | 상태 | 원전표 | 금액 | 적요
+                1 | 2026-11-06 | 일반 | 정상 | - | 100,000원 | 운영자금 차입
+                """, output());
+    }
+
+    private void writeLoanVoucher() {
+        vouchers.write(LocalDate.of(2026, 11, 6), "운영자금 차입",
+                accounts.findByCode(new AccountCode("101")),
+                accounts.findByCode(new AccountCode("201")),
+                new Amount(100_000L));
+    }
+
+    @Test
+    @DisplayName("전표가 없으면 상세 조회 안내 없이 오류만 출력하고 입력을 읽지 않는다")
+    void rejectsDetailWithoutVouchers() {
+        controllerWithInput("다음 메뉴 입력\n").showDetail();
+
+        assertEquals("[ERROR] 등록된 전표가 없습니다.\n", output());
+        assertEquals("다음 메뉴 입력", inputView.readLine());
+    }
+
+    @Test
+    @DisplayName("전표번호를 입력받아 상세를 출력한다")
+    void showsDetail() {
+        registerCashAndLoan();
+        writeLoanVoucher();
+
+        controllerWithInput("1\n").showDetail();
+
+        String output = output();
+        assertTrue(output.startsWith("조회할 전표번호를 입력해 주세요.\n[전표 상세]\n전표번호: 1\n"));
+        assertTrue(output.endsWith("차변: 101 현금 | 100,000원\n대변: 201 차입금 | 100,000원\n"));
+    }
+
+    @Test
+    @DisplayName("없는 번호나 잘못된 형식이면 같은 안내로 다시 입력받는다")
+    void retriesDetailOnUnknownOrInvalidNumber() {
+        registerCashAndLoan();
+        writeLoanVoucher();
+
+        controllerWithInput("2\n01\n1\n").showDetail();
+
+        String output = output();
+        assertTrue(output.startsWith("조회할 전표번호를 입력해 주세요.\n"
+                + "[ERROR] 존재하지 않는 전표번호입니다. (2)\n"
+                + "조회할 전표번호를 입력해 주세요.\n"
+                + "[ERROR] 전표번호는 1부터 2,147,483,647까지의 숫자만 입력해야 합니다.\n"
+                + "조회할 전표번호를 입력해 주세요.\n"
+                + "[전표 상세]\n"));
+    }
 }

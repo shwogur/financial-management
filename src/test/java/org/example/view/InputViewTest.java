@@ -150,4 +150,29 @@ class InputViewTest {
 
         assertThrows(InputEndedException.class, inputView::readVoucher);
     }
+
+    @Test
+    @DisplayName("앞뒤 공백을 제거하고 전표번호를 읽는다")
+    void readsVoucherNumber() {
+        InputView inputView = inputViewOf(" 4 \n");
+
+        assertEquals(4, inputView.readVoucherNumber());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0", "04", "abc", "1,2", ""})
+    @DisplayName("전표번호 입력이 형식이나 범위에 맞지 않으면 거절한다")
+    void rejectsInvalidVoucherNumber(String line) {
+        InputView inputView = inputViewOf(line + "\n");
+
+        assertThrows(IllegalArgumentException.class, inputView::readVoucherNumber);
+    }
+
+    @Test
+    @DisplayName("전표번호 입력 중 입력이 끝나면 입력 종료 예외를 던진다")
+    void throwsWhenInputEndsWhileReadingVoucherNumber() {
+        InputView inputView = inputViewOf("");
+
+        assertThrows(InputEndedException.class, inputView::readVoucherNumber);
+    }
 }

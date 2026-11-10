@@ -56,6 +56,10 @@ public class InputView {
                 new Amount(InputParser.parseAmount(items.get(VOUCHER_AMOUNT))));
     }
 
+    public int readVoucherNumber() {
+        return InputParser.parseVoucherNumber(readLine().strip());
+    }
+
     private String readFromReader() {
         try {
             return reader.readLine();

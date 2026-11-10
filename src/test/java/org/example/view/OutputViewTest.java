@@ -3,6 +3,8 @@ package org.example.view;
 import org.example.domain.Account;
 import org.example.domain.AccountCode;
 import org.example.domain.AccountType;
+import org.example.domain.Amount;
+import org.example.domain.Vouchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -132,5 +135,78 @@ class OutputViewTest {
         outputView.printNotEnoughAccountsForVoucher();
 
         assertEquals("[ERROR] 전표 작성에는 계정과목이 2개 이상 필요합니다.\n", output());
+    }
+
+    @Test
+    @DisplayName("전표가 없으면 열 제목 없이 안내 문구만 출력한다")
+    void printsEmptyVouchers() {
+        outputView.printVouchers(List.of());
+
+        assertEquals("""
+                [전표 목록]
+                등록된 전표가 없습니다.
+                """, output());
+    }
+
+    @Test
+    @DisplayName("전표 목록을 번호순으로, 금액은 천 단위 쉼표와 원, 원전표가 없으면 -로 출력한다")
+    void printsVouchers() {
+        Account cash = account("101", "현금", AccountType.ASSET);
+        Account loan = account("201", "차입금", AccountType.LIABILITY);
+        Vouchers vouchers = new Vouchers();
+        LocalDate date = LocalDate.of(2026, 11, 6);
+        vouchers.write(date, "운영자금 차입", cash, loan, new Amount(100_000L));
+        vouchers.write(date, "최소 금액", cash, loan, new Amount(1L));
+        vouchers.write(LocalDate.of(1, 1, 1), "최대 금액", cash, loan, new Amount(1_000_000_000L));
+
+        outputView.printVouchers(vouchers.findAll());
+
+        assertEquals("""
+                [전표 목록]
+                번호 | 거래일자 | 구분 | 상태 | 원전표 | 금액 | 적요
+                1 | 2026-11-06 | 일반 | 정상 | - | 100,000원 | 운영자금 차입
+                2 | 2026-11-06 | 일반 | 정상 | - | 1원 | 최소 금액
+                3 | 0001-01-01 | 일반 | 정상 | - | 1,000,000,000원 | 최대 금액
+                """, output());
+    }
+
+    @Test
+    @DisplayName("상세 조회 입력 안내를 지정된 문구로 출력한다")
+    void printsVoucherNumberPrompt() {
+        outputView.printVoucherNumberPrompt();
+
+        assertEquals("조회할 전표번호를 입력해 주세요.\n", output());
+    }
+
+    @Test
+    @DisplayName("전표 상세를 차변·대변 계정 코드와 계정명, 금액 형식과 함께 출력한다")
+    void printsVoucherDetail() {
+        Vouchers vouchers = new Vouchers();
+        vouchers.write(LocalDate.of(2026, 11, 6), "운영자금 차입",
+                account("101", "현금", AccountType.ASSET),
+                account("201", "차입금", AccountType.LIABILITY),
+                new Amount(100_000L));
+
+        outputView.printVoucherDetail(vouchers.findByNumber(1));
+
+        assertEquals("""
+                [전표 상세]
+                전표번호: 1
+                거래일자: 2026-11-06
+                구분: 일반
+                상태: 정상
+                원전표번호: -
+                적요: 운영자금 차입
+                차변: 101 현금 | 100,000원
+                대변: 201 차입금 | 100,000원
+                """, output());
+    }
+
+    @Test
+    @DisplayName("전표가 없으면 지정된 오류 문구를 출력한다")
+    void printsNoVouchers() {
+        outputView.printNoVouchers();
+
+        assertEquals("[ERROR] 등록된 전표가 없습니다.\n", output());
     }
 }

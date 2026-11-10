@@ -36,6 +36,24 @@ class VoucherController {
         outputView.printVoucherWritten(voucher.number());
     }
 
+    void showAll() {
+        outputView.printVouchers(vouchers.findAll());
+    }
+
+    void showDetail() {
+        if (vouchers.isEmpty()) {
+            outputView.printNoVouchers();
+            return;
+        }
+        Voucher voucher = retryHandler.retry(this::readAndFind);
+        outputView.printVoucherDetail(voucher);
+    }
+
+    private Voucher readAndFind() {
+        outputView.printVoucherNumberPrompt();
+        return vouchers.findByNumber(inputView.readVoucherNumber());
+    }
+
     private Voucher readAndWrite() {
         outputView.printVoucherWritePrompt();
         VoucherInput input = inputView.readVoucher();

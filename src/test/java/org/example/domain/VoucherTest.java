@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class VoucherTest {
 
@@ -28,7 +29,7 @@ class VoucherTest {
     }
 
     @Test
-    @DisplayName("일반 전표는 구분 일반, 상태 정상으로 생성되고 입력한 내용을 그대로 가진다")
+    @DisplayName("일반 전표는 구분 일반, 상태 정상, 원전표번호 없음으로 생성되고 입력한 내용을 그대로 가진다")
     void createsNormalVoucher() {
         Voucher voucher = Voucher.normal(1, DATE, "사무용품 구입", SUPPLIES, CASH, AMOUNT);
 
@@ -40,7 +41,8 @@ class VoucherTest {
                 () -> assertEquals(CASH, voucher.credit()),
                 () -> assertEquals(AMOUNT, voucher.amount()),
                 () -> assertEquals(VoucherType.NORMAL, voucher.type()),
-                () -> assertEquals(VoucherStatus.NORMAL, voucher.status())
+                () -> assertEquals(VoucherStatus.NORMAL, voucher.status()),
+                () -> assertTrue(voucher.originalNumber().isEmpty())
         );
     }
 

@@ -203,6 +203,83 @@ class MenuControllerTest {
     }
 
     @Test
+    @DisplayName("처음 실행한 상태에서 전표 목록은 비어 있다")
+    void showsEmptyVouchersAtStart() {
+        String expected = MENU
+                + "[전표 목록]\n"
+                + "등록된 전표가 없습니다.\n"
+                + MENU
+                + EXIT;
+
+        assertEquals(expected, run("5\n0\n"));
+    }
+
+    @Test
+    @DisplayName("전표 3건을 작성한 뒤 목록을 조회하면 번호순으로 출력한다")
+    void showsVouchersAfterWriting() {
+        String input = FOUR_ACCOUNTS + """
+                3
+                2026-11-06,운영자금 차입,101,201,100000
+                3
+                2026-11-06,사무용품 구입,501,101,10000
+                3
+                2026-11-06,용역대금 수령,101,401,30000
+                5
+                0
+                """;
+
+        String output = run(input);
+
+        assertTrue(output.contains("""
+                [전표 목록]
+                번호 | 거래일자 | 구분 | 상태 | 원전표 | 금액 | 적요
+                1 | 2026-11-06 | 일반 | 정상 | - | 100,000원 | 운영자금 차입
+                2 | 2026-11-06 | 일반 | 정상 | - | 10,000원 | 사무용품 구입
+                3 | 2026-11-06 | 일반 | 정상 | - | 30,000원 | 용역대금 수령
+                """));
+    }
+
+    @Test
+    @DisplayName("전표가 없으면 상세 조회 안내 없이 오류를 출력하고 메뉴로 돌아간다")
+    void returnsToMenuWhenNoVouchersForDetail() {
+        String expected = MENU
+                + "[ERROR] 등록된 전표가 없습니다.\n"
+                + MENU
+                + EXIT;
+
+        assertEquals(expected, run("6\n0\n"));
+    }
+
+    @Test
+    @DisplayName("전표를 작성한 뒤 번호로 상세를 조회한다")
+    void showsVoucherDetailAfterWriting() {
+        String input = FOUR_ACCOUNTS + """
+                3
+                2026-11-06,운영자금 차입,101,201,100000
+                3
+                2026-11-06,사무용품 구입,501,101,10000
+                6
+                2
+                0
+                """;
+
+        String output = run(input);
+
+        assertTrue(output.contains("""
+                조회할 전표번호를 입력해 주세요.
+                [전표 상세]
+                전표번호: 2
+                거래일자: 2026-11-06
+                구분: 일반
+                상태: 정상
+                원전표번호: -
+                적요: 사무용품 구입
+                차변: 501 소모품비 | 10,000원
+                대변: 101 현금 | 10,000원
+                """));
+    }
+
+    @Test
     @DisplayName("전표 입력 도중 입력이 끝나면 전표를 저장하지 않고 종료한다")
     void doesNotSaveWhenInputEndsDuringVoucherInput() {
         Vouchers vouchers = new Vouchers();

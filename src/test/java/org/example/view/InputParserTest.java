@@ -122,4 +122,25 @@ class InputParserTest {
     void rejectsWrongAmountShape(String text) {
         assertThrows(IllegalArgumentException.class, () -> InputParser.parseAmount(text));
     }
+
+    @ParameterizedTest
+    @CsvSource({"1, 1", "4, 4", "2147483647, 2147483647"})
+    @DisplayName("1부터 2,147,483,647까지의 전표번호를 변환한다")
+    void parsesVoucherNumber(String text, int expected) {
+        assertEquals(expected, InputParser.parseVoucherNumber(text));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0", "2147483648", "99999999999"})
+    @DisplayName("전표번호가 1부터 2,147,483,647 범위를 벗어나면 거절한다")
+    void rejectsVoucherNumberOutOfRange(String text) {
+        assertThrows(IllegalArgumentException.class, () -> InputParser.parseVoucherNumber(text));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"-1", "+1", "01", "1.0", "1,000", "1 0", "abc", "１", "1234567890123456789"})
+    @DisplayName("전표번호에 부호, 소수점, 쉼표, 공백, 앞자리 0, 숫자가 아닌 문자가 있으면 거절한다")
+    void rejectsWrongVoucherNumberShape(String text) {
+        assertThrows(IllegalArgumentException.class, () -> InputParser.parseVoucherNumber(text));
+    }
 }

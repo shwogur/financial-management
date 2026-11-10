@@ -15,8 +15,12 @@ public final class InputParser {
     private static final String DATE_ERROR = "날짜는 yyyy-MM-dd 형식의 실제 존재하는 날짜여야 합니다. (예: 2026-11-06)";
     private static final String YEAR_RANGE_ERROR = "연도는 0001년부터 9999년까지 입력할 수 있습니다.";
 
+    // 0, 또는 1~9로 시작하는 최대 18자리 ASCII 숫자 (부호·소수점·쉼표·공백·앞자리 0 거절, long 범위 보장)
     private static final String NUMBER_SHAPE = "0|[1-9][0-9]{0,17}";
     private static final String AMOUNT_ERROR = "금액은 부호, 소수점, 쉼표, 불필요한 앞자리 0 없이 숫자만 입력해야 합니다.";
+
+    private static final int MIN_VOUCHER_NUMBER = 1;
+    private static final String VOUCHER_NUMBER_ERROR = "전표번호는 1부터 2,147,483,647까지의 숫자만 입력해야 합니다.";
 
     private InputParser() {
     }
@@ -43,6 +47,17 @@ public final class InputParser {
             throw new IllegalArgumentException(AMOUNT_ERROR);
         }
         return Long.parseLong(text);
+    }
+
+    public static int parseVoucherNumber(String text) {
+        if (!text.matches(NUMBER_SHAPE)) {
+            throw new IllegalArgumentException(VOUCHER_NUMBER_ERROR);
+        }
+        long number = Long.parseLong(text);
+        if (number < MIN_VOUCHER_NUMBER || number > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException(VOUCHER_NUMBER_ERROR);
+        }
+        return (int) number;
     }
 
     private static void validateCount(List<String> items, int expectedCount) {

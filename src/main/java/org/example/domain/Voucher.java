@@ -2,6 +2,7 @@ package org.example.domain;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.OptionalInt;
 
 public class Voucher {
 
@@ -15,9 +16,10 @@ public class Voucher {
     private final Amount amount;
     private final VoucherType type;
     private final VoucherStatus status;
+    private final OptionalInt originalNumber;
 
     private Voucher(int number, LocalDate date, String description, Account debit, Account credit,
-                    Amount amount, VoucherType type, VoucherStatus status) {
+                    Amount amount, VoucherType type, VoucherStatus status, OptionalInt originalNumber) {
         validateDifferentAccounts(debit, credit);
         this.number = number;
         this.date = Objects.requireNonNull(date);
@@ -27,12 +29,13 @@ public class Voucher {
         this.amount = Objects.requireNonNull(amount);
         this.type = type;
         this.status = status;
+        this.originalNumber = originalNumber;
     }
 
     static Voucher normal(int number, LocalDate date, String description,
                           Account debit, Account credit, Amount amount) {
         return new Voucher(number, date, description, debit, credit, amount,
-                VoucherType.NORMAL, VoucherStatus.NORMAL);
+                VoucherType.NORMAL, VoucherStatus.NORMAL, OptionalInt.empty());
     }
 
     private static void validateDifferentAccounts(Account debit, Account credit) {
@@ -81,5 +84,9 @@ public class Voucher {
 
     public VoucherStatus status() {
         return status;
+    }
+
+    public OptionalInt originalNumber() {
+        return originalNumber;
     }
 }

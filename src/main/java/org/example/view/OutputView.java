@@ -2,9 +2,13 @@ package org.example.view;
 
 import org.example.domain.Account;
 import org.example.domain.AccountCode;
+import org.example.domain.Amount;
+import org.example.domain.Voucher;
 
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Locale;
+import java.util.OptionalInt;
 
 public class OutputView {
 
@@ -21,6 +25,10 @@ public class OutputView {
             메뉴를 선택해 주세요.""";
     private static final String ERROR_PREFIX = "[ERROR] ";
     private static final String ACCOUNT_ROW_FORMAT = "%s | %s | %s";
+    private static final String VOUCHER_ROW_FORMAT = "%d | %s | %s | %s | %s | %s | %s";
+    private static final String ENTRY_FORMAT = "%s: %s %s | %s";
+    private static final String MONEY_FORMAT = "%,d원";
+    private static final String NO_ORIGINAL_NUMBER = "-";
 
     private final PrintStream out;
 
@@ -61,6 +69,63 @@ public class OutputView {
 
     public void printVoucherWritten(int voucherNumber) {
         out.println("전표가 작성되었습니다. (전표번호: " + voucherNumber + ")");
+    }
+
+    public void printVouchers(List<Voucher> vouchers) {
+        out.println("[전표 목록]");
+        if (vouchers.isEmpty()) {
+            out.println("등록된 전표가 없습니다.");
+            return;
+        }
+        out.println("번호 | 거래일자 | 구분 | 상태 | 원전표 | 금액 | 적요");
+        vouchers.forEach(this::printVoucherRow);
+    }
+
+    private void printVoucherRow(Voucher voucher) {
+        out.println(String.format(VOUCHER_ROW_FORMAT,
+                voucher.number(),
+                voucher.date(),
+                voucher.type().displayName(),
+                voucher.status().displayName(),
+                formatOriginalNumber(voucher.originalNumber()),
+                formatMoney(voucher.amount().value()),
+                voucher.description()));
+    }
+
+    public void printVoucherNumberPrompt() {
+        out.println("조회할 전표번호를 입력해 주세요.");
+    }
+
+    public void printVoucherDetail(Voucher voucher) {
+        out.println("[전표 상세]");
+        out.println("전표번호: " + voucher.number());
+        out.println("거래일자: " + voucher.date());
+        out.println("구분: " + voucher.type().displayName());
+        out.println("상태: " + voucher.status().displayName());
+        out.println("원전표번호: " + formatOriginalNumber(voucher.originalNumber()));
+        out.println("적요: " + voucher.description());
+        printEntry("차변", voucher.debit(), voucher.amount());
+        printEntry("대변", voucher.credit(), voucher.amount());
+    }
+
+    private void printEntry(String side, Account account, Amount amount) {
+        out.println(String.format(ENTRY_FORMAT,
+                side, account.code().value(), account.name(), formatMoney(amount.value())));
+    }
+
+    public void printNoVouchers() {
+        printError("등록된 전표가 없습니다.");
+    }
+
+    private String formatOriginalNumber(OptionalInt originalNumber) {
+        if (originalNumber.isEmpty()) {
+            return NO_ORIGINAL_NUMBER;
+        }
+        return String.valueOf(originalNumber.getAsInt());
+    }
+
+    private String formatMoney(long value) {
+        return String.format(Locale.US, MONEY_FORMAT, value);
     }
 
     public void printNotEnoughAccountsForVoucher() {
