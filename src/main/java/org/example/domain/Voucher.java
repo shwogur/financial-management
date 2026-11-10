@@ -5,7 +5,6 @@ import java.util.Objects;
 
 public class Voucher {
 
-    private static final int MIN_DESCRIPTION_LENGTH = 1;
     private static final int MAX_DESCRIPTION_LENGTH = 50;
 
     private final int number;
@@ -46,7 +45,7 @@ public class Voucher {
 
     private static String validateDescription(String description) {
         String stripped = Objects.requireNonNull(description).strip();
-        if (stripped.length() < MIN_DESCRIPTION_LENGTH || stripped.length() > MAX_DESCRIPTION_LENGTH) {
+        if (stripped.isEmpty() || stripped.length() > MAX_DESCRIPTION_LENGTH) {
             throw new IllegalArgumentException("적요는 1자 이상 50자 이하여야 합니다.");
         }
         return stripped;

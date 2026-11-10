@@ -4,7 +4,6 @@ import java.util.Objects;
 
 public class Account {
 
-    private static final int MIN_NAME_LENGTH = 1;
     private static final int MAX_NAME_LENGTH = 20;
 
     private final AccountCode code;
@@ -19,7 +18,7 @@ public class Account {
 
     private static String validateName(String name) {
         String stripped = Objects.requireNonNull(name).strip();
-        if (stripped.length() < MIN_NAME_LENGTH || stripped.length() > MAX_NAME_LENGTH) {
+        if (stripped.isEmpty() || stripped.length() > MAX_NAME_LENGTH) {
             throw new IllegalArgumentException("계정명은 1자 이상 20자 이하여야 합니다.");
         }
         return stripped;

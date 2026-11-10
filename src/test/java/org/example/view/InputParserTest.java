@@ -11,6 +11,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InputParserTest {
 
@@ -75,10 +76,31 @@ class InputParserTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"2026-2-3", "26-11-06", "2026/11/06", "20261106", "2026-11-06 ", "0000-01-01", "１２３４-11-06"})
-    @DisplayName("yyyy-MM-dd 형식이 아니거나 연도가 0001 미만이면 거절한다")
+    @ValueSource(strings = {"2026-2-3", "26-11-06", "2026/11/06", "20261106", "2026-11-06 ", "１２３４-11-06",
+            "02026-01-01", "+2026-01-01"})
+    @DisplayName("yyyy-MM-dd 형식이 아니면 거절한다")
     void rejectsWrongDateShape(String text) {
         assertThrows(IllegalArgumentException.class, () -> InputParser.parseDate(text));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0000-01-01", "-0001-01-01", "+12345-01-01"})
+    @DisplayName("연도가 0001년부터 9999년 사이가 아니면 거절한다")
+    void rejectsYearOutOfRange(String text) {
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> InputParser.parseDate(text));
+
+        assertTrue(exception.getMessage().contains("연도"));
+    }
+
+    @Test
+    @DisplayName("형식이 틀리거나 없는 날짜면 올바른 형식 예시를 안내한다")
+    void explainsDateFormatWithExample() {
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> InputParser.parseDate("2026-02-30"));
+
+        assertTrue(exception.getMessage().contains("yyyy-MM-dd"));
+        assertTrue(exception.getMessage().contains("2026-11-06"));
     }
 
     @ParameterizedTest
