@@ -1,4 +1,4 @@
-package org.example.view;
+package org.example.view.input;
 
 public class InputEndedException extends RuntimeException {
 

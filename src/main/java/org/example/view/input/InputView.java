@@ -1,9 +1,9 @@
-package org.example.view;
+package org.example.view.input;
 
-import org.example.domain.Account;
-import org.example.domain.AccountCode;
-import org.example.domain.AccountType;
-import org.example.domain.Amount;
+import org.example.domain.account.Account;
+import org.example.domain.account.AccountCode;
+import org.example.domain.account.AccountType;
+import org.example.domain.voucher.Amount;
 
 import java.io.BufferedReader;
 import java.io.IOException;

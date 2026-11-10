@@ -1,4 +1,4 @@
-package org.example.domain;
+package org.example.domain.account;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

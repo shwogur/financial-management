@@ -1,4 +1,8 @@
-package org.example.domain;
+package org.example.domain.voucher;
+
+import org.example.domain.account.Account;
+import org.example.domain.account.AccountCode;
+import org.example.domain.account.AccountType;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

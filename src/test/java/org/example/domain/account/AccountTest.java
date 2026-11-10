@@ -1,4 +1,4 @@
-package org.example.domain;
+package org.example.domain.account;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

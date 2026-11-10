@@ -1,9 +1,9 @@
-package org.example.view;
+package org.example.view.output;
 
-import org.example.domain.Account;
-import org.example.domain.AccountCode;
-import org.example.domain.Amount;
-import org.example.domain.Voucher;
+import org.example.domain.account.Account;
+import org.example.domain.account.AccountCode;
+import org.example.domain.voucher.Amount;
+import org.example.domain.voucher.Voucher;
 
 import java.io.PrintStream;
 import java.util.List;

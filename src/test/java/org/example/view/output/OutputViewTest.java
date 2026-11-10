@@ -1,10 +1,10 @@
-package org.example.view;
+package org.example.view.output;
 
-import org.example.domain.Account;
-import org.example.domain.AccountCode;
-import org.example.domain.AccountType;
-import org.example.domain.Amount;
-import org.example.domain.Vouchers;
+import org.example.domain.account.Account;
+import org.example.domain.account.AccountCode;
+import org.example.domain.account.AccountType;
+import org.example.domain.voucher.Amount;
+import org.example.domain.voucher.Vouchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

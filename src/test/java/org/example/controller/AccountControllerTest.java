@@ -1,12 +1,12 @@
 package org.example.controller;
 
-import org.example.domain.Account;
-import org.example.domain.AccountCode;
-import org.example.domain.AccountType;
-import org.example.domain.Accounts;
-import org.example.view.InputEndedException;
-import org.example.view.InputView;
-import org.example.view.OutputView;
+import org.example.domain.account.Account;
+import org.example.domain.account.AccountCode;
+import org.example.domain.account.AccountType;
+import org.example.domain.account.Accounts;
+import org.example.view.input.InputEndedException;
+import org.example.view.input.InputView;
+import org.example.view.output.OutputView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

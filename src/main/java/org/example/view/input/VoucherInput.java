@@ -1,7 +1,7 @@
-package org.example.view;
+package org.example.view.input;
 
-import org.example.domain.AccountCode;
-import org.example.domain.Amount;
+import org.example.domain.account.AccountCode;
+import org.example.domain.voucher.Amount;
 
 import java.time.LocalDate;
 

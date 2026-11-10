@@ -1,6 +1,6 @@
 package org.example.controller;
 
-import org.example.view.OutputView;
+import org.example.view.output.OutputView;
 
 import java.util.function.Supplier;
 

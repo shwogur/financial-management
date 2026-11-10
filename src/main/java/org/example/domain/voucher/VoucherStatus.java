@@ -1,12 +1,12 @@
-package org.example.domain;
+package org.example.domain.voucher;
 
-public enum VoucherType {
-    NORMAL("일반"),
-    CANCEL("취소");
+public enum VoucherStatus {
+    NORMAL("정상"),
+    CANCELED("취소");
 
     private final String displayName;
 
-    VoucherType(String displayName) {
+    VoucherStatus(String displayName) {
         this.displayName = displayName;
     }
 

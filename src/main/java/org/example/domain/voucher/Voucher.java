@@ -1,4 +1,7 @@
-package org.example.domain;
+package org.example.domain.voucher;
+
+import org.example.domain.account.Account;
+import org.example.domain.account.AccountCode;
 
 import java.time.LocalDate;
 import java.util.Objects;

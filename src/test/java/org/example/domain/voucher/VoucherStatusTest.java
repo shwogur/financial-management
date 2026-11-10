@@ -1,4 +1,4 @@
-package org.example.domain;
+package org.example.domain.voucher;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;

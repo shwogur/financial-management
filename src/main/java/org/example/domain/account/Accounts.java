@@ -1,4 +1,4 @@
-package org.example.domain;
+package org.example.domain.account;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package org.example.domain;
+package org.example.domain.account;
 
 public record AccountCode(String value) implements Comparable<AccountCode> {
 

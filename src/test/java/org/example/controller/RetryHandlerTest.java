@@ -1,7 +1,7 @@
 package org.example.controller;
 
-import org.example.view.InputEndedException;
-import org.example.view.OutputView;
+import org.example.view.input.InputEndedException;
+import org.example.view.output.OutputView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

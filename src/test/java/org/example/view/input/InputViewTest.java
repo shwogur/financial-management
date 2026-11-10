@@ -1,4 +1,4 @@
-package org.example.view;
+package org.example.view.input;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,10 +12,10 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.example.domain.Account;
-import org.example.domain.AccountCode;
-import org.example.domain.AccountType;
-import org.example.domain.Amount;
+import org.example.domain.account.Account;
+import org.example.domain.account.AccountCode;
+import org.example.domain.account.AccountType;
+import org.example.domain.voucher.Amount;
 
 class InputViewTest {
 

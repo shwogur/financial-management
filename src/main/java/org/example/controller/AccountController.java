@@ -1,10 +1,10 @@
 package org.example.controller;
 
-import org.example.domain.Account;
-import org.example.domain.AccountCode;
-import org.example.domain.Accounts;
-import org.example.view.InputView;
-import org.example.view.OutputView;
+import org.example.domain.account.Account;
+import org.example.domain.account.AccountCode;
+import org.example.domain.account.Accounts;
+import org.example.view.input.InputView;
+import org.example.view.output.OutputView;
 
 class AccountController {
 

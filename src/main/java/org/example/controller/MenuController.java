@@ -1,10 +1,10 @@
 package org.example.controller;
 
-import org.example.domain.Accounts;
-import org.example.domain.Vouchers;
-import org.example.view.InputEndedException;
-import org.example.view.InputView;
-import org.example.view.OutputView;
+import org.example.domain.account.Accounts;
+import org.example.domain.voucher.Vouchers;
+import org.example.view.input.InputEndedException;
+import org.example.view.input.InputView;
+import org.example.view.output.OutputView;
 
 public class MenuController {
 

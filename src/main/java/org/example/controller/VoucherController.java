@@ -1,13 +1,13 @@
 package org.example.controller;
 
-import org.example.domain.Account;
-import org.example.domain.Accounts;
-import org.example.domain.Voucher;
-import org.example.domain.Vouchers;
-import org.example.view.CancelInput;
-import org.example.view.InputView;
-import org.example.view.OutputView;
-import org.example.view.VoucherInput;
+import org.example.domain.account.Account;
+import org.example.domain.account.Accounts;
+import org.example.domain.voucher.Voucher;
+import org.example.domain.voucher.Vouchers;
+import org.example.view.input.CancelInput;
+import org.example.view.input.InputView;
+import org.example.view.input.VoucherInput;
+import org.example.view.output.OutputView;
 
 class VoucherController {
 
