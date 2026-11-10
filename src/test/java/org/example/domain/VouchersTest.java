@@ -133,4 +133,82 @@ class VouchersTest {
 
         assertFalse(vouchers.isEmpty());
     }
+
+    private static final LocalDate NEXT_DAY = DATE.plusDays(1);
+
+    private void writeThree() {
+        writeValid();
+        writeValid();
+        writeValid();
+    }
+
+    @Test
+    @DisplayName("취소하면 다음 번호의 취소 전표를 저장하고 원전표를 취소 상태로 바꾼다")
+    void cancelsWithNextNumber() {
+        writeThree();
+
+        Voucher reversal = vouchers.cancel(2, NEXT_DAY);
+
+        assertEquals(4, reversal.number());
+        assertEquals(4, vouchers.findAll().size());
+        assertEquals(reversal, vouchers.findByNumber(4));
+        assertEquals(VoucherStatus.CANCELED, vouchers.findByNumber(2).status());
+    }
+
+    @Test
+    @DisplayName("일반 전표와 취소 전표는 같은 번호 순서를 사용한다")
+    void sharesNumberSequenceWithReversal() {
+        writeThree();
+        vouchers.cancel(2, NEXT_DAY);
+
+        assertEquals(5, writeValid().number());
+    }
+
+    @Test
+    @DisplayName("없는 번호를 취소하면 거절하고 전표 수와 다음 번호를 바꾸지 않는다")
+    void rejectsUnknownNumberWithoutChange() {
+        writeThree();
+
+        assertThrows(IllegalArgumentException.class, () -> vouchers.cancel(9, NEXT_DAY));
+
+        assertEquals(3, vouchers.findAll().size());
+        assertEquals(4, writeValid().number());
+    }
+
+    @Test
+    @DisplayName("이미 취소한 전표를 다시 취소하면 거절하고 전표 수와 다음 번호를 바꾸지 않는다")
+    void rejectsDuplicateCancelWithoutChange() {
+        writeThree();
+        vouchers.cancel(2, NEXT_DAY);
+
+        assertThrows(IllegalArgumentException.class, () -> vouchers.cancel(2, NEXT_DAY));
+
+        assertEquals(4, vouchers.findAll().size());
+        assertEquals(5, writeValid().number());
+    }
+
+    @Test
+    @DisplayName("취소 전표를 취소하면 거절하고 취소 전표 상태와 다음 번호를 바꾸지 않는다")
+    void rejectsCancelingReversalWithoutChange() {
+        writeThree();
+        vouchers.cancel(2, NEXT_DAY);
+
+        assertThrows(IllegalArgumentException.class, () -> vouchers.cancel(4, NEXT_DAY));
+
+        assertEquals(VoucherStatus.NORMAL, vouchers.findByNumber(4).status());
+        assertEquals(4, vouchers.findAll().size());
+        assertEquals(5, writeValid().number());
+    }
+
+    @Test
+    @DisplayName("원거래보다 이른 취소일자는 거절하고 원전표 상태, 전표 수, 다음 번호를 바꾸지 않는다")
+    void rejectsEarlierDateWithoutChange() {
+        writeThree();
+
+        assertThrows(IllegalArgumentException.class, () -> vouchers.cancel(2, DATE.minusDays(1)));
+
+        assertEquals(VoucherStatus.NORMAL, vouchers.findByNumber(2).status());
+        assertEquals(3, vouchers.findAll().size());
+        assertEquals(4, writeValid().number());
+    }
 }

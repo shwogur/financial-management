@@ -92,6 +92,14 @@ public class OutputView {
                 voucher.description()));
     }
 
+    public void printCancelPrompt() {
+        out.println("취소 정보를 입력해 주세요. (원전표번호,취소일자)");
+    }
+
+    public void printVoucherCanceled(int originalNumber, int cancelNumber) {
+        out.println("전표가 취소되었습니다. (원전표번호: " + originalNumber + ", 취소전표번호: " + cancelNumber + ")");
+    }
+
     public void printVoucherNumberPrompt() {
         out.println("조회할 전표번호를 입력해 주세요.");
     }

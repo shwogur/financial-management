@@ -6,6 +6,7 @@ import org.example.domain.AccountType;
 import org.example.domain.Accounts;
 import org.example.domain.Amount;
 import org.example.domain.Voucher;
+import org.example.domain.VoucherStatus;
 import org.example.domain.Vouchers;
 import org.example.view.InputEndedException;
 import org.example.view.InputView;
@@ -206,5 +207,65 @@ class VoucherControllerTest {
                 + "[ERROR] 전표번호는 1부터 2,147,483,647까지의 숫자만 입력해야 합니다.\n"
                 + "조회할 전표번호를 입력해 주세요.\n"
                 + "[전표 상세]\n"));
+    }
+
+    private static final String CANCEL_PROMPT = "취소 정보를 입력해 주세요. (원전표번호,취소일자)\n";
+
+    @Test
+    @DisplayName("전표가 없으면 취소 안내 없이 오류만 출력하고 입력을 읽지 않는다")
+    void rejectsCancelWithoutVouchers() {
+        controllerWithInput("다음 메뉴 입력\n").cancel();
+
+        assertEquals("[ERROR] 등록된 전표가 없습니다.\n", output());
+        assertEquals("다음 메뉴 입력", inputView.readLine());
+    }
+
+    @Test
+    @DisplayName("원전표번호와 취소일자를 입력받아 취소하고 두 번호를 출력한다")
+    void cancelsVoucher() {
+        registerCashAndLoan();
+        writeLoanVoucher();
+
+        controllerWithInput("1,2026-11-07\n").cancel();
+
+        assertEquals(CANCEL_PROMPT + "전표가 취소되었습니다. (원전표번호: 1, 취소전표번호: 2)\n", output());
+        assertEquals(VoucherStatus.CANCELED, vouchers.findByNumber(1).status());
+    }
+
+    @Test
+    @DisplayName("이른 취소일자, 취소 전표 취소, 중복 취소는 같은 안내로 다시 입력받고 전표를 더 만들지 않는다")
+    void retriesCancelUntilValid() {
+        registerCashAndLoan();
+        writeLoanVoucher();
+
+        controllerWithInput("""
+                1,2026-11-05
+                1,2026-11-06
+                """).cancel();
+        VoucherController noCancelableLeft = controllerWithInput("2,2026-11-07\n1,2026-11-07\n");
+        assertThrows(InputEndedException.class, noCancelableLeft::cancel);
+
+        String output = output();
+        assertTrue(output.startsWith(CANCEL_PROMPT
+                + "[ERROR] 취소일자는 원전표 거래일자(2026-11-06)와 같거나 이후여야 합니다.\n"
+                + CANCEL_PROMPT
+                + "전표가 취소되었습니다. (원전표번호: 1, 취소전표번호: 2)\n"
+                + CANCEL_PROMPT
+                + "[ERROR] 취소 전표는 취소할 수 없습니다. (2)\n"
+                + CANCEL_PROMPT
+                + "[ERROR] 이미 취소된 전표입니다. (1)\n"));
+        assertEquals(2, vouchers.findAll().size());
+    }
+
+    @Test
+    @DisplayName("취소 입력 중 입력이 끝나면 원전표 상태를 바꾸지 않고 입력 종료를 전달한다")
+    void doesNotCancelWhenInputEnds() {
+        registerCashAndLoan();
+        writeLoanVoucher();
+        VoucherController controller = controllerWithInput("");
+
+        assertThrows(InputEndedException.class, controller::cancel);
+        assertEquals(VoucherStatus.NORMAL, vouchers.findByNumber(1).status());
+        assertEquals(1, vouchers.findAll().size());
     }
 }

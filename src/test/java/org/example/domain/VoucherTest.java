@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
+import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -92,5 +93,84 @@ class VoucherTest {
         Account anotherCash = account("102", "현금", AccountType.ASSET);
 
         assertDoesNotThrow(() -> Voucher.normal(1, DATE, "현금 이동", anotherCash, CASH, AMOUNT));
+    }
+
+    private static final LocalDate NEXT_DAY = DATE.plusDays(1);
+
+    private static Voucher original() {
+        return Voucher.normal(2, DATE, "사무용품 구입", SUPPLIES, CASH, AMOUNT);
+    }
+
+    @Test
+    @DisplayName("취소하면 차변과 대변을 바꾸고 금액·적요를 복사한 취소 전표를 만든다")
+    void createsReversalOnCancel() {
+        Voucher reversal = original().cancel(4, NEXT_DAY);
+
+        assertAll(
+                () -> assertEquals(4, reversal.number()),
+                () -> assertEquals(NEXT_DAY, reversal.date()),
+                () -> assertEquals(CASH, reversal.debit()),
+                () -> assertEquals(SUPPLIES, reversal.credit()),
+                () -> assertEquals(AMOUNT, reversal.amount()),
+                () -> assertEquals("사무용품 구입", reversal.description()),
+                () -> assertEquals(VoucherType.CANCEL, reversal.type()),
+                () -> assertEquals(VoucherStatus.NORMAL, reversal.status()),
+                () -> assertEquals(OptionalInt.of(2), reversal.originalNumber())
+        );
+    }
+
+    @Test
+    @DisplayName("취소하면 원전표는 상태만 취소로 바뀌고 나머지 내용은 그대로다")
+    void changesOnlyStatusOfOriginal() {
+        Voucher original = original();
+
+        original.cancel(4, NEXT_DAY);
+
+        assertAll(
+                () -> assertEquals(VoucherStatus.CANCELED, original.status()),
+                () -> assertEquals(VoucherType.NORMAL, original.type()),
+                () -> assertEquals(DATE, original.date()),
+                () -> assertEquals(SUPPLIES, original.debit()),
+                () -> assertEquals(CASH, original.credit()),
+                () -> assertEquals(AMOUNT, original.amount()),
+                () -> assertEquals("사무용품 구입", original.description()),
+                () -> assertTrue(original.originalNumber().isEmpty())
+        );
+    }
+
+    @Test
+    @DisplayName("원전표 거래일자와 같은 날에도 취소할 수 있다")
+    void allowsCancelOnSameDay() {
+        assertDoesNotThrow(() -> original().cancel(4, DATE));
+    }
+
+    @Test
+    @DisplayName("이미 취소된 전표는 다시 취소할 수 없다")
+    void rejectsAlreadyCanceled() {
+        Voucher original = original();
+        original.cancel(4, NEXT_DAY);
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> original.cancel(5, NEXT_DAY));
+
+        assertEquals("이미 취소된 전표입니다. (2)", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("취소 전표 자체는 취소할 수 없다")
+    void rejectsCancelingReversal() {
+        Voucher reversal = original().cancel(4, NEXT_DAY);
+
+        assertThrows(IllegalArgumentException.class, () -> reversal.cancel(5, NEXT_DAY));
+        assertEquals(VoucherStatus.NORMAL, reversal.status());
+    }
+
+    @Test
+    @DisplayName("원전표 거래일자보다 이른 취소일자는 거절하고 원전표 상태를 바꾸지 않는다")
+    void rejectsEarlierCancelDateWithoutChangingStatus() {
+        Voucher original = original();
+
+        assertThrows(IllegalArgumentException.class, () -> original.cancel(4, DATE.minusDays(1)));
+        assertEquals(VoucherStatus.NORMAL, original.status());
     }
 }

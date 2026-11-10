@@ -24,6 +24,10 @@ public class InputView {
     private static final int VOUCHER_CREDIT_CODE = 3;
     private static final int VOUCHER_AMOUNT = 4;
 
+    private static final int CANCEL_ITEM_COUNT = 2;
+    private static final int CANCEL_ORIGINAL_NUMBER = 0;
+    private static final int CANCEL_DATE = 1;
+
     private final BufferedReader reader;
 
     public InputView(BufferedReader reader) {
@@ -54,6 +58,13 @@ public class InputView {
                 new AccountCode(items.get(VOUCHER_DEBIT_CODE)),
                 new AccountCode(items.get(VOUCHER_CREDIT_CODE)),
                 new Amount(InputParser.parseAmount(items.get(VOUCHER_AMOUNT))));
+    }
+
+    public CancelInput readCancel() {
+        List<String> items = InputParser.split(readLine(), CANCEL_ITEM_COUNT);
+        return new CancelInput(
+                InputParser.parseVoucherNumber(items.get(CANCEL_ORIGINAL_NUMBER)),
+                InputParser.parseDate(items.get(CANCEL_DATE)));
     }
 
     public int readVoucherNumber() {

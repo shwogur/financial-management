@@ -280,6 +280,68 @@ class MenuControllerTest {
     }
 
     @Test
+    @DisplayName("전표가 없으면 취소 안내 없이 오류를 출력하고 메뉴로 돌아간다")
+    void returnsToMenuWhenNoVouchersForCancel() {
+        String expected = MENU
+                + "[ERROR] 등록된 전표가 없습니다.\n"
+                + MENU
+                + EXIT;
+
+        assertEquals(expected, run("4\n0\n"));
+    }
+
+    @Test
+    @DisplayName("6장 시나리오 6~15: 전표 작성, 취소, 목록·상세 조회, 중복 취소 후 입력 종료")
+    void followsChapterSixScenario() {
+        String input = FOUR_ACCOUNTS + """
+                3
+                2026-11-06,운영자금 차입,101,201,100000
+                3
+                2026-11-06,사무용품 구입,501,101,10000
+                3
+                2026-11-06,용역대금 수령,101,401,30000
+                4
+                2,2026-11-07
+                5
+                6
+                4
+                4
+                2,2026-11-07
+                """;
+        Vouchers vouchers = new Vouchers();
+
+        String output = run(input, new Accounts(), vouchers);
+
+        assertTrue(output.contains("전표가 취소되었습니다. (원전표번호: 2, 취소전표번호: 4)\n"));
+        assertTrue(output.contains("""
+                [전표 목록]
+                번호 | 거래일자 | 구분 | 상태 | 원전표 | 금액 | 적요
+                1 | 2026-11-06 | 일반 | 정상 | - | 100,000원 | 운영자금 차입
+                2 | 2026-11-06 | 일반 | 취소 | - | 10,000원 | 사무용품 구입
+                3 | 2026-11-06 | 일반 | 정상 | - | 30,000원 | 용역대금 수령
+                4 | 2026-11-07 | 취소 | 정상 | 2 | 10,000원 | 사무용품 구입
+                """));
+        assertTrue(output.contains("""
+                [전표 상세]
+                전표번호: 4
+                거래일자: 2026-11-07
+                구분: 취소
+                상태: 정상
+                원전표번호: 2
+                적요: 사무용품 구입
+                차변: 101 현금 | 10,000원
+                대변: 501 소모품비 | 10,000원
+                """));
+        assertTrue(output.endsWith("""
+                취소 정보를 입력해 주세요. (원전표번호,취소일자)
+                [ERROR] 이미 취소된 전표입니다. (2)
+                취소 정보를 입력해 주세요. (원전표번호,취소일자)
+                프로그램을 종료합니다.
+                """));
+        assertEquals(4, vouchers.findAll().size());
+    }
+
+    @Test
     @DisplayName("전표 입력 도중 입력이 끝나면 전표를 저장하지 않고 종료한다")
     void doesNotSaveWhenInputEndsDuringVoucherInput() {
         Vouchers vouchers = new Vouchers();

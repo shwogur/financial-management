@@ -49,6 +49,7 @@ public class MenuController {
             case REGISTER_ACCOUNT -> accountController.register();
             case SHOW_ACCOUNTS -> accountController.show();
             case WRITE_VOUCHER -> voucherController.write();
+            case CANCEL_VOUCHER -> voucherController.cancel();
             case SHOW_VOUCHERS -> voucherController.showAll();
             case SHOW_VOUCHER_DETAIL -> voucherController.showDetail();
             default -> outputView.printError("아직 지원하지 않는 메뉴입니다.");

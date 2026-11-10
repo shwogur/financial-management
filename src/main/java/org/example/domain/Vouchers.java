@@ -14,6 +14,13 @@ public class Vouchers {
         return voucher;
     }
 
+    public Voucher cancel(int originalNumber, LocalDate cancelDate) {
+        Voucher original = findByNumber(originalNumber);
+        Voucher reversal = original.cancel(nextNumber(), cancelDate);
+        writtenVouchers.add(reversal);
+        return reversal;
+    }
+
     public Voucher findByNumber(int number) {
         return writtenVouchers.stream()
                 .filter(voucher -> voucher.number() == number)

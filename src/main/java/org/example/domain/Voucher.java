@@ -15,7 +15,7 @@ public class Voucher {
     private final Account credit;
     private final Amount amount;
     private final VoucherType type;
-    private final VoucherStatus status;
+    private VoucherStatus status;   // 유일하게 바뀌는 값: cancel()로만 정상 → 취소
     private final OptionalInt originalNumber;
 
     private Voucher(int number, LocalDate date, String description, Account debit, Account credit,
@@ -36,6 +36,26 @@ public class Voucher {
                           Account debit, Account credit, Amount amount) {
         return new Voucher(number, date, description, debit, credit, amount,
                 VoucherType.NORMAL, VoucherStatus.NORMAL, OptionalInt.empty());
+    }
+
+    Voucher cancel(int cancelNumber, LocalDate cancelDate) {
+        validateCancelable(Objects.requireNonNull(cancelDate));
+        Voucher reversal = new Voucher(cancelNumber, cancelDate, description, credit, debit, amount,
+                VoucherType.CANCEL, VoucherStatus.NORMAL, OptionalInt.of(number));
+        status = VoucherStatus.CANCELED;
+        return reversal;
+    }
+
+    private void validateCancelable(LocalDate cancelDate) {
+        if (type == VoucherType.CANCEL) {
+            throw new IllegalArgumentException("취소 전표는 취소할 수 없습니다. (" + number + ")");
+        }
+        if (status == VoucherStatus.CANCELED) {
+            throw new IllegalArgumentException("이미 취소된 전표입니다. (" + number + ")");
+        }
+        if (cancelDate.isBefore(date)) {
+            throw new IllegalArgumentException("취소일자는 원전표 거래일자(" + date + ")와 같거나 이후여야 합니다.");
+        }
     }
 
     private static void validateDifferentAccounts(Account debit, Account credit) {

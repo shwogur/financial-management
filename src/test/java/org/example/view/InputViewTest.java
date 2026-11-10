@@ -175,4 +175,37 @@ class InputViewTest {
 
         assertThrows(InputEndedException.class, inputView::readVoucherNumber);
     }
+
+    @Test
+    @DisplayName("한 줄을 읽어 원전표번호와 취소일자로 변환한다")
+    void readsCancel() {
+        InputView inputView = inputViewOf(" 2 , 2026-11-07 \n");
+
+        assertEquals(new CancelInput(2, LocalDate.of(2026, 11, 7)), inputView.readCancel());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"2", "2,2026-11-07,", "0,2026-11-07", "02,2026-11-07", "2,2026-02-30", "2,2026-11-7"})
+    @DisplayName("취소 입력의 개수, 전표번호 형식, 날짜가 잘못되면 거절한다")
+    void rejectsInvalidCancelInput(String line) {
+        InputView inputView = inputViewOf(line + "\n");
+
+        assertThrows(IllegalArgumentException.class, inputView::readCancel);
+    }
+
+    @Test
+    @DisplayName("존재 여부나 취소 가능 여부는 판단하지 않고 그대로 전달한다")
+    void doesNotJudgeCancelability() {
+        InputView inputView = inputViewOf("999,0001-01-01\n");
+
+        assertEquals(new CancelInput(999, LocalDate.of(1, 1, 1)), inputView.readCancel());
+    }
+
+    @Test
+    @DisplayName("취소 입력 중 입력이 끝나면 입력 종료 예외를 던진다")
+    void throwsWhenInputEndsWhileReadingCancel() {
+        InputView inputView = inputViewOf("");
+
+        assertThrows(InputEndedException.class, inputView::readCancel);
+    }
 }

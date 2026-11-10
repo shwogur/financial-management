@@ -171,6 +171,22 @@ class OutputViewTest {
     }
 
     @Test
+    @DisplayName("취소 입력 안내를 지정된 문구로 출력한다")
+    void printsCancelPrompt() {
+        outputView.printCancelPrompt();
+
+        assertEquals("취소 정보를 입력해 주세요. (원전표번호,취소일자)\n", output());
+    }
+
+    @Test
+    @DisplayName("취소 성공 메시지에 원전표번호와 취소전표번호를 출력한다")
+    void printsVoucherCanceled() {
+        outputView.printVoucherCanceled(2, 4);
+
+        assertEquals("전표가 취소되었습니다. (원전표번호: 2, 취소전표번호: 4)\n", output());
+    }
+
+    @Test
     @DisplayName("상세 조회 입력 안내를 지정된 문구로 출력한다")
     void printsVoucherNumberPrompt() {
         outputView.printVoucherNumberPrompt();

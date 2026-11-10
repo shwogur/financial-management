@@ -4,6 +4,7 @@ import org.example.domain.Account;
 import org.example.domain.Accounts;
 import org.example.domain.Voucher;
 import org.example.domain.Vouchers;
+import org.example.view.CancelInput;
 import org.example.view.InputView;
 import org.example.view.OutputView;
 import org.example.view.VoucherInput;
@@ -36,6 +37,15 @@ class VoucherController {
         outputView.printVoucherWritten(voucher.number());
     }
 
+    void cancel() {
+        if (vouchers.isEmpty()) {
+            outputView.printNoVouchers();
+            return;
+        }
+        Voucher reversal = retryHandler.retry(this::readAndCancel);
+        outputView.printVoucherCanceled(reversal.originalNumber().getAsInt(), reversal.number());
+    }
+
     void showAll() {
         outputView.printVouchers(vouchers.findAll());
     }
@@ -47,6 +57,12 @@ class VoucherController {
         }
         Voucher voucher = retryHandler.retry(this::readAndFind);
         outputView.printVoucherDetail(voucher);
+    }
+
+    private Voucher readAndCancel() {
+        outputView.printCancelPrompt();
+        CancelInput input = inputView.readCancel();
+        return vouchers.cancel(input.originalNumber(), input.cancelDate());
     }
 
     private Voucher readAndFind() {
