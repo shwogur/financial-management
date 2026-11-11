@@ -2,7 +2,7 @@ package org.example.view.output;
 
 import org.example.domain.account.Account;
 import org.example.domain.account.AccountCode;
-import org.example.domain.voucher.Amount;
+import org.example.domain.voucher.EntrySide;
 import org.example.domain.voucher.Voucher;
 
 import java.io.PrintStream;
@@ -112,13 +112,14 @@ public class OutputView {
         out.println("상태: " + voucher.status().displayName());
         out.println("원전표번호: " + formatOriginalNumber(voucher.originalNumber()));
         out.println("적요: " + voucher.description());
-        printEntry("차변", voucher.debit(), voucher.amount());
-        printEntry("대변", voucher.credit(), voucher.amount());
+        printEntry(EntrySide.DEBIT, voucher);
+        printEntry(EntrySide.CREDIT, voucher);
     }
 
-    private void printEntry(String side, Account account, Amount amount) {
+    private void printEntry(EntrySide side, Voucher voucher) {
+        Account account = voucher.accountOn(side);
         out.println(String.format(ENTRY_FORMAT,
-                side, account.code().value(), account.name(), formatMoney(amount.value())));
+                side.displayName(), account.code().value(), account.name(), formatMoney(voucher.amount().value())));
     }
 
     public void printNoVouchers() {

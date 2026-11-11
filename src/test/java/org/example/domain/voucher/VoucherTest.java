@@ -99,6 +99,17 @@ class VoucherTest {
         assertDoesNotThrow(() -> Voucher.normal(1, DATE, "현금 이동", anotherCash, CASH, AMOUNT));
     }
 
+    @Test
+    @DisplayName("방향을 지정하면 해당 방향의 계정을 돌려준다")
+    void returnsAccountOnSide() {
+        Voucher voucher = Voucher.normal(1, DATE, "사무용품 구입", SUPPLIES, CASH, AMOUNT);
+
+        assertAll(
+                () -> assertEquals(SUPPLIES, voucher.accountOn(EntrySide.DEBIT)),
+                () -> assertEquals(CASH, voucher.accountOn(EntrySide.CREDIT))
+        );
+    }
+
     private static final LocalDate NEXT_DAY = DATE.plusDays(1);
 
     private static Voucher original() {
