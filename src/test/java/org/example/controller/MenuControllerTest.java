@@ -75,6 +75,24 @@ class MenuControllerTest {
     }
 
     @Test
+    @DisplayName("처음 실행한 상태에서 현황을 조회하면 빈 목록과 0원 합계를 출력하고 메뉴로 돌아간다")
+    void showsEmptyBalanceAtStart() {
+        String expected = MENU
+                + """
+                [자산 현황]
+                등록된 자산 계정이 없습니다.
+                자산 합계: 0원
+                [부채 현황]
+                등록된 부채 계정이 없습니다.
+                부채 합계: 0원
+                """
+                + MENU
+                + EXIT;
+
+        assertEquals(expected, run("7\n0\n"));
+    }
+
+    @Test
     @DisplayName("처음 실행한 상태에서 계정 목록은 비어 있다")
     void showsEmptyAccountsAtStart() {
         String expected = MENU
@@ -291,7 +309,7 @@ class MenuControllerTest {
     }
 
     @Test
-    @DisplayName("6장 시나리오 6~15: 전표 작성, 취소, 목록·상세 조회, 중복 취소 후 입력 종료")
+    @DisplayName("6장 시나리오 6~15: 전표 작성, 현황, 취소, 목록·상세 조회, 취소 후 현황, 중복 취소 후 입력 종료")
     void followsChapterSixScenario() {
         String input = FOUR_ACCOUNTS + """
                 3
@@ -300,11 +318,13 @@ class MenuControllerTest {
                 2026-11-06,사무용품 구입,501,101,10000
                 3
                 2026-11-06,용역대금 수령,101,401,30000
+                7
                 4
                 2,2026-11-07
                 5
                 6
                 4
+                7
                 4
                 2,2026-11-07
                 """;
@@ -312,6 +332,22 @@ class MenuControllerTest {
 
         String output = run(input, new Accounts(), vouchers);
 
+        assertTrue(output.contains("""
+                [자산 현황]
+                101 현금 | 120,000원
+                자산 합계: 120,000원
+                [부채 현황]
+                201 차입금 | 100,000원
+                부채 합계: 100,000원
+                """), "9번: 취소 전 현황");
+        assertTrue(output.contains("""
+                [자산 현황]
+                101 현금 | 130,000원
+                자산 합계: 130,000원
+                [부채 현황]
+                201 차입금 | 100,000원
+                부채 합계: 100,000원
+                """), "13번: 취소 후 현황");
         assertTrue(output.contains("전표가 취소되었습니다. (원전표번호: 2, 취소전표번호: 4)\n"));
         assertTrue(output.contains("""
                 [전표 목록]

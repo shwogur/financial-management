@@ -3,7 +3,9 @@ package org.example.view.output;
 import org.example.domain.account.Account;
 import org.example.domain.account.AccountCode;
 import org.example.domain.account.AccountType;
+import org.example.domain.voucher.AccountBalance;
 import org.example.domain.voucher.Amount;
+import org.example.domain.voucher.BalanceSheet;
 import org.example.domain.voucher.Vouchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -224,5 +226,79 @@ class OutputViewTest {
         outputView.printNoVouchers();
 
         assertEquals("[ERROR] 등록된 전표가 없습니다.\n", output());
+    }
+
+    @Test
+    @DisplayName("자산·부채 현황을 계정별 잔액과 분류별 합계로 출력한다")
+    void printsBalanceSheet() {
+        BalanceSheet sheet = new BalanceSheet(
+                List.of(new AccountBalance(account("101", "현금", AccountType.ASSET), 130_000L)),
+                List.of(new AccountBalance(account("201", "차입금", AccountType.LIABILITY), 100_000L)));
+
+        outputView.printBalanceSheet(sheet);
+
+        assertEquals("""
+                [자산 현황]
+                101 현금 | 130,000원
+                자산 합계: 130,000원
+                [부채 현황]
+                201 차입금 | 100,000원
+                부채 합계: 100,000원
+                """, output());
+    }
+
+    @Test
+    @DisplayName("0원과 음수 잔액은 보정하지 않고 그대로 출력한다")
+    void printsZeroAndNegativeBalances() {
+        BalanceSheet sheet = new BalanceSheet(
+                List.of(new AccountBalance(account("101", "현금", AccountType.ASSET), -10_000L),
+                        new AccountBalance(account("102", "보통예금", AccountType.ASSET), 0L)),
+                List.of(new AccountBalance(account("201", "차입금", AccountType.LIABILITY), 0L)));
+
+        outputView.printBalanceSheet(sheet);
+
+        assertEquals("""
+                [자산 현황]
+                101 현금 | -10,000원
+                102 보통예금 | 0원
+                자산 합계: -10,000원
+                [부채 현황]
+                201 차입금 | 0원
+                부채 합계: 0원
+                """, output());
+    }
+
+    @Test
+    @DisplayName("분류에 계정이 없으면 안내 문구와 0원 합계를 각각 출력한다")
+    void printsEmptyBalanceSheet() {
+        outputView.printBalanceSheet(new BalanceSheet(List.of(), List.of()));
+
+        assertEquals("""
+                [자산 현황]
+                등록된 자산 계정이 없습니다.
+                자산 합계: 0원
+                [부채 현황]
+                등록된 부채 계정이 없습니다.
+                부채 합계: 0원
+                """, output());
+    }
+
+    @Test
+    @DisplayName("자산과 부채는 계정이 없는지 각각 따로 판단한다")
+    void handlesEachTypeIndependently() {
+        BalanceSheet sheet = new BalanceSheet(
+                List.of(new AccountBalance(account("101", "현금", AccountType.ASSET), 0L)),
+                List.of());
+
+        outputView.printBalanceSheet(sheet);
+
+        assertEquals("""
+                [자산 현황]
+                101 현금 | 0원
+                자산 합계: 0원
+                [부채 현황]
+                등록된 부채 계정이 없습니다.
+                부채 합계: 0원
+                """, output());
     }
 }

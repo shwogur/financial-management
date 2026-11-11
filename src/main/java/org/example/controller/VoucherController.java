@@ -2,6 +2,7 @@ package org.example.controller;
 
 import org.example.domain.account.Account;
 import org.example.domain.account.Accounts;
+import org.example.domain.voucher.BalanceSheet;
 import org.example.domain.voucher.Voucher;
 import org.example.domain.voucher.Vouchers;
 import org.example.view.input.CancelInput;
@@ -57,6 +58,10 @@ class VoucherController {
         }
         Voucher voucher = retryHandler.retry(this::readAndFind);
         outputView.printVoucherDetail(voucher);
+    }
+
+    void showBalance() {
+        outputView.printBalanceSheet(BalanceSheet.of(accounts.findAll(), vouchers));
     }
 
     private Voucher readAndCancel() {

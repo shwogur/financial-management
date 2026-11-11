@@ -52,7 +52,10 @@ public class MenuController {
             case CANCEL_VOUCHER -> voucherController.cancel();
             case SHOW_VOUCHERS -> voucherController.showAll();
             case SHOW_VOUCHER_DETAIL -> voucherController.showDetail();
-            default -> outputView.printError("아직 지원하지 않는 메뉴입니다.");
+            case SHOW_BALANCE -> voucherController.showBalance();
+            case EXIT -> {
+                // EXIT는 processMenusUntilExit()의 반복 조건에서 먼저 걸러진다.
+            }
         }
     }
 }

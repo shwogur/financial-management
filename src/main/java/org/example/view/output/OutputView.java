@@ -2,6 +2,9 @@ package org.example.view.output;
 
 import org.example.domain.account.Account;
 import org.example.domain.account.AccountCode;
+import org.example.domain.account.AccountType;
+import org.example.domain.voucher.AccountBalance;
+import org.example.domain.voucher.BalanceSheet;
 import org.example.domain.voucher.EntrySide;
 import org.example.domain.voucher.Voucher;
 
@@ -29,6 +32,7 @@ public class OutputView {
     private static final String ENTRY_FORMAT = "%s: %s %s | %s";
     private static final String MONEY_FORMAT = "%,d원";
     private static final String NO_ORIGINAL_NUMBER = "-";
+    private static final String BALANCE_ROW_FORMAT = "%s %s | %s";
 
     private final PrintStream out;
 
@@ -135,6 +139,27 @@ public class OutputView {
 
     private String formatMoney(long value) {
         return String.format(Locale.US, MONEY_FORMAT, value);
+    }
+
+    public void printBalanceSheet(BalanceSheet sheet) {
+        printBalanceSection(AccountType.ASSET, sheet.assets(), sheet.assetTotal());
+        printBalanceSection(AccountType.LIABILITY, sheet.liabilities(), sheet.liabilityTotal());
+    }
+
+    private void printBalanceSection(AccountType type, List<AccountBalance> balances, long total) {
+        String typeName = type.displayName();
+        out.println("[" + typeName + " 현황]");
+        if (balances.isEmpty()) {
+            out.println("등록된 " + typeName + " 계정이 없습니다.");
+        }
+        balances.forEach(this::printBalanceRow);
+        out.println(typeName + " 합계: " + formatMoney(total));
+    }
+
+    private void printBalanceRow(AccountBalance balance) {
+        Account account = balance.account();
+        out.println(String.format(BALANCE_ROW_FORMAT,
+                account.code().value(), account.name(), formatMoney(balance.balance())));
     }
 
     public void printNotEnoughAccountsForVoucher() {

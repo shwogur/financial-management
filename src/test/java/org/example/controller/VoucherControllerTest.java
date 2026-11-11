@@ -268,4 +268,23 @@ class VoucherControllerTest {
         assertEquals(VoucherStatus.NORMAL, vouchers.findByNumber(1).status());
         assertEquals(1, vouchers.findAll().size());
     }
+
+    @Test
+    @DisplayName("현황 조회는 입력을 읽지 않고 등록된 계정과 전표로 자산·부채 현황을 출력한다")
+    void showsBalanceWithoutReadingInput() {
+        registerCashAndLoan();
+        writeLoanVoucher();
+
+        controllerWithInput("다음 메뉴 입력\n").showBalance();
+
+        assertEquals("""
+                [자산 현황]
+                101 현금 | 100,000원
+                자산 합계: 100,000원
+                [부채 현황]
+                201 차입금 | 100,000원
+                부채 합계: 100,000원
+                """, output());
+        assertEquals("다음 메뉴 입력", inputView.readLine());
+    }
 }

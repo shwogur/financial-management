@@ -215,4 +215,82 @@ class VouchersTest {
         assertEquals(3, vouchers.findAll().size());
         assertEquals(4, writeValid().number());
     }
+
+    private static final Account DEPOSIT = new Account(new AccountCode("102"), "보통예금", AccountType.ASSET);
+    private static final Account SALES = new Account(new AccountCode("401"), "매출", AccountType.REVENUE);
+    private static final Account SUPPLIES = new Account(new AccountCode("501"), "소모품비", AccountType.EXPENSE);
+
+    private void write(Account debit, Account credit, long amount) {
+        vouchers.write(DATE, "거래", debit, credit, new Amount(amount));
+    }
+
+    @Test
+    @DisplayName("거래가 없는 계정의 잔액은 0원이다")
+    void balanceIsZeroWithoutEntries() {
+        write(CASH, LOAN, 100_000L);
+
+        assertEquals(0L, vouchers.balanceOf(DEPOSIT));
+    }
+
+    @Test
+    @DisplayName("자산은 차변 누계 - 대변 누계, 부채는 대변 누계 - 차변 누계로 집계한다")
+    void sumsByAccountType() {
+        write(CASH, LOAN, 100_000L);    // 차입: 현금 +100,000 / 차입금 +100,000
+        write(LOAN, CASH, 30_000L);     // 상환: 현금 -30,000 / 차입금 -30,000
+
+        assertEquals(70_000L, vouchers.balanceOf(CASH));
+        assertEquals(70_000L, vouchers.balanceOf(LOAN));
+    }
+
+    @Test
+    @DisplayName("수익·비용 전표의 자산 쪽 행도 자산 잔액에 반영한다")
+    void includesAssetSideOfRevenueAndExpense() {
+        write(CASH, SALES, 50_000L);      // 매출: 현금 +50,000
+        write(SUPPLIES, CASH, 10_000L);   // 소모품 구입: 현금 -10,000
+
+        assertEquals(40_000L, vouchers.balanceOf(CASH));
+        assertEquals(50_000L, vouchers.balanceOf(SALES));
+        assertEquals(10_000L, vouchers.balanceOf(SUPPLIES));
+    }
+
+    @Test
+    @DisplayName("같은 분류끼리의 거래는 한쪽을 늘리고 다른 쪽을 줄인다")
+    void movesBetweenAssets() {
+        write(CASH, LOAN, 100_000L);
+        write(DEPOSIT, CASH, 40_000L);    // 현금을 예금에 입금
+
+        assertEquals(60_000L, vouchers.balanceOf(CASH));
+        assertEquals(40_000L, vouchers.balanceOf(DEPOSIT));
+    }
+
+    @Test
+    @DisplayName("감소 쪽 누계가 더 크면 음수 잔액을 그대로 돌려준다")
+    void keepsNegativeBalance() {
+        write(SUPPLIES, CASH, 10_000L);
+
+        assertEquals(-10_000L, vouchers.balanceOf(CASH));
+    }
+
+    @Test
+    @DisplayName("취소된 원전표와 취소 전표를 함께 집계해 금액이 상쇄된다")
+    void cancelOffsetsOriginal() {
+        write(CASH, LOAN, 100_000L);
+        write(SUPPLIES, CASH, 10_000L);
+        vouchers.cancel(2, NEXT_DAY);
+
+        assertEquals(100_000L, vouchers.balanceOf(CASH));
+        assertEquals(0L, vouchers.balanceOf(SUPPLIES));
+        assertEquals(100_000L, vouchers.balanceOf(LOAN));
+    }
+
+    @Test
+    @DisplayName("상한 금액 전표 3건의 누계 3,000,000,000원을 정확하게 계산한다")
+    void sumsBeyondIntRange() {
+        write(CASH, LOAN, 1_000_000_000L);
+        write(CASH, LOAN, 1_000_000_000L);
+        write(CASH, LOAN, 1_000_000_000L);
+
+        assertEquals(3_000_000_000L, vouchers.balanceOf(CASH));
+        assertEquals(3_000_000_000L, vouchers.balanceOf(LOAN));
+    }
 }

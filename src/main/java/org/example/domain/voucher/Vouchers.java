@@ -38,6 +38,20 @@ public class Vouchers {
         return writtenVouchers.isEmpty();
     }
 
+    public long balanceOf(Account account) {
+        long debitTotal = totalOn(account, EntrySide.DEBIT);
+        long creditTotal = totalOn(account, EntrySide.CREDIT);
+        return account.type().balanceOf(debitTotal, creditTotal);
+    }
+
+    private long totalOn(Account account, EntrySide side) {
+        // 구분·상태로 거르지 않는다. 취소된 원전표와 취소 전표가 함께 집계되어야 서로 상쇄된다(4.6).
+        return writtenVouchers.stream()
+                .filter(voucher -> voucher.accountOn(side).code().equals(account.code()))
+                .mapToLong(voucher -> voucher.amount().value())
+                .sum();
+    }
+
     private int nextNumber() {
         // 전표는 삭제되지 않으므로(2장) 지금까지 저장된 전표 수 + 1이 항상 다음 번호다.
         // 실패한 요청은 저장되지 않으므로 번호도 소비하지 않는다(4.3).
