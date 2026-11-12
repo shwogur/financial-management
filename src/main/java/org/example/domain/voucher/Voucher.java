@@ -1,7 +1,6 @@
 package org.example.domain.voucher;
 
 import org.example.domain.account.Account;
-import org.example.domain.account.AccountCode;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -62,9 +61,7 @@ public class Voucher {
     }
 
     private static void validateDifferentAccounts(Account debit, Account credit) {
-        AccountCode debitCode = Objects.requireNonNull(debit).code();
-        AccountCode creditCode = Objects.requireNonNull(credit).code();
-        if (debitCode.equals(creditCode)) {
+        if (Objects.requireNonNull(debit).equals(Objects.requireNonNull(credit))) {
             throw new IllegalArgumentException("차변과 대변에 같은 계정 코드를 선택할 수 없습니다.");
         }
     }
@@ -94,6 +91,13 @@ public class Voucher {
             case DEBIT -> debit;
             case CREDIT -> credit;
         };
+    }
+
+    public long amountOn(Account account, EntrySide side) {
+        if (accountOn(side).equals(account)) {
+            return amount.value();
+        }
+        return 0L;
     }
 
     public Amount amount() {

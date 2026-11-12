@@ -99,6 +99,30 @@ class VoucherTest {
         assertDoesNotThrow(() -> Voucher.normal(1, DATE, "현금 이동", anotherCash, CASH, AMOUNT));
     }
 
+    @Test
+    @DisplayName("서로 다른 객체라도 코드가 같으면 같은 계정으로 보고 거절한다")
+    void rejectsDifferentObjectsWithSameCode() {
+        Account sameCodeAsCash = account("101", "현금", AccountType.ASSET);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> Voucher.normal(1, DATE, "잘못된 전표", sameCodeAsCash, CASH, AMOUNT));
+    }
+
+    @Test
+    @DisplayName("계정이 해당 방향에 기록되어 있으면 금액을, 아니면 0을 돌려준다")
+    void returnsAmountOnSide() {
+        Voucher voucher = Voucher.normal(1, DATE, "사무용품 구입", SUPPLIES, CASH, AMOUNT);
+        Account loan = account("201", "차입금", AccountType.LIABILITY);
+
+        assertAll(
+                () -> assertEquals(10_000L, voucher.amountOn(SUPPLIES, EntrySide.DEBIT)),
+                () -> assertEquals(10_000L, voucher.amountOn(CASH, EntrySide.CREDIT)),
+                () -> assertEquals(0L, voucher.amountOn(SUPPLIES, EntrySide.CREDIT)),
+                () -> assertEquals(0L, voucher.amountOn(CASH, EntrySide.DEBIT)),
+                () -> assertEquals(0L, voucher.amountOn(loan, EntrySide.DEBIT))
+        );
+    }
+
     private static final LocalDate NEXT_DAY = DATE.plusDays(1);
 
     private static Voucher original() {

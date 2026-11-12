@@ -35,4 +35,15 @@ public class Account {
     public AccountType type() {
         return type;
     }
+
+    // 계정은 코드로 구별한다(4.1). 이름이나 분류가 달라도 코드가 같으면 같은 계정이다.
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof Account account && code.equals(account.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return code.hashCode();
+    }
 }

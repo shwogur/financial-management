@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AccountTest {
@@ -48,5 +50,26 @@ class AccountTest {
     void rejectsBlankName(String name) {
         assertThrows(IllegalArgumentException.class,
                 () -> new Account(CODE, name, AccountType.ASSET));
+    }
+
+    @Test
+    @DisplayName("코드가 같으면 이름과 분류가 달라도 같은 계정으로 본다")
+    void equalsByCode() {
+        Account cash = new Account(CODE, "현금", AccountType.ASSET);
+        Account sameCode = new Account(new AccountCode("101"), "보통예금", AccountType.LIABILITY);
+
+        assertAll(
+                () -> assertEquals(cash, sameCode),
+                () -> assertEquals(cash.hashCode(), sameCode.hashCode())
+        );
+    }
+
+    @Test
+    @DisplayName("이름과 분류가 같아도 코드가 다르면 다른 계정으로 본다")
+    void notEqualWithDifferentCode() {
+        Account cash = new Account(CODE, "현금", AccountType.ASSET);
+        Account anotherCash = new Account(new AccountCode("102"), "현금", AccountType.ASSET);
+
+        assertNotEquals(cash, anotherCash);
     }
 }
