@@ -42,8 +42,8 @@ class VoucherTest {
                 () -> assertEquals(1, voucher.number()),
                 () -> assertEquals(DATE, voucher.date()),
                 () -> assertEquals("사무용품 구입", voucher.description()),
-                () -> assertEquals(SUPPLIES, voucher.debit()),
-                () -> assertEquals(CASH, voucher.credit()),
+                () -> assertEquals(SUPPLIES, voucher.accountOn(EntrySide.DEBIT)),
+                () -> assertEquals(CASH, voucher.accountOn(EntrySide.CREDIT)),
                 () -> assertEquals(AMOUNT, voucher.amount()),
                 () -> assertEquals(VoucherType.NORMAL, voucher.type()),
                 () -> assertEquals(VoucherStatus.NORMAL, voucher.status()),
@@ -99,17 +99,6 @@ class VoucherTest {
         assertDoesNotThrow(() -> Voucher.normal(1, DATE, "현금 이동", anotherCash, CASH, AMOUNT));
     }
 
-    @Test
-    @DisplayName("방향을 지정하면 해당 방향의 계정을 돌려준다")
-    void returnsAccountOnSide() {
-        Voucher voucher = Voucher.normal(1, DATE, "사무용품 구입", SUPPLIES, CASH, AMOUNT);
-
-        assertAll(
-                () -> assertEquals(SUPPLIES, voucher.accountOn(EntrySide.DEBIT)),
-                () -> assertEquals(CASH, voucher.accountOn(EntrySide.CREDIT))
-        );
-    }
-
     private static final LocalDate NEXT_DAY = DATE.plusDays(1);
 
     private static Voucher original() {
@@ -124,8 +113,8 @@ class VoucherTest {
         assertAll(
                 () -> assertEquals(4, reversal.number()),
                 () -> assertEquals(NEXT_DAY, reversal.date()),
-                () -> assertEquals(CASH, reversal.debit()),
-                () -> assertEquals(SUPPLIES, reversal.credit()),
+                () -> assertEquals(CASH, reversal.accountOn(EntrySide.DEBIT)),
+                () -> assertEquals(SUPPLIES, reversal.accountOn(EntrySide.CREDIT)),
                 () -> assertEquals(AMOUNT, reversal.amount()),
                 () -> assertEquals("사무용품 구입", reversal.description()),
                 () -> assertEquals(VoucherType.CANCEL, reversal.type()),
@@ -145,8 +134,8 @@ class VoucherTest {
                 () -> assertEquals(VoucherStatus.CANCELED, original.status()),
                 () -> assertEquals(VoucherType.NORMAL, original.type()),
                 () -> assertEquals(DATE, original.date()),
-                () -> assertEquals(SUPPLIES, original.debit()),
-                () -> assertEquals(CASH, original.credit()),
+                () -> assertEquals(SUPPLIES, original.accountOn(EntrySide.DEBIT)),
+                () -> assertEquals(CASH, original.accountOn(EntrySide.CREDIT)),
                 () -> assertEquals(AMOUNT, original.amount()),
                 () -> assertEquals("사무용품 구입", original.description()),
                 () -> assertTrue(original.originalNumber().isEmpty())

@@ -89,14 +89,6 @@ public class Voucher {
         return description;
     }
 
-    public Account debit() {
-        return debit;
-    }
-
-    public Account credit() {
-        return credit;
-    }
-
     public Account accountOn(EntrySide side) {
         return switch (side) {
             case DEBIT -> debit;

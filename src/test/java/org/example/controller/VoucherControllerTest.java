@@ -5,6 +5,7 @@ import org.example.domain.account.AccountCode;
 import org.example.domain.account.AccountType;
 import org.example.domain.account.Accounts;
 import org.example.domain.voucher.Amount;
+import org.example.domain.voucher.EntrySide;
 import org.example.domain.voucher.Voucher;
 import org.example.domain.voucher.VoucherStatus;
 import org.example.domain.voucher.Vouchers;
@@ -92,8 +93,8 @@ class VoucherControllerTest {
         assertEquals(1, written.size());
         Voucher voucher = written.get(0);
         assertEquals(LocalDate.of(2026, 11, 6), voucher.date());
-        assertEquals("현금", voucher.debit().name());
-        assertEquals("차입금", voucher.credit().name());
+        assertEquals("현금", voucher.accountOn(EntrySide.DEBIT).name());
+        assertEquals("차입금", voucher.accountOn(EntrySide.CREDIT).name());
         assertEquals(100_000L, voucher.amount().value());
     }
 
