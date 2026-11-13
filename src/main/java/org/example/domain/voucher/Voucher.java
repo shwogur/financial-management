@@ -93,13 +93,6 @@ public class Voucher {
         };
     }
 
-    public long amountOn(Account account, EntrySide side) {
-        if (accountOn(side).equals(account)) {
-            return amount.value();
-        }
-        return 0L;
-    }
-
     public Amount amount() {
         return amount;
     }

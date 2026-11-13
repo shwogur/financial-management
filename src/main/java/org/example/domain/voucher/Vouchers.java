@@ -47,7 +47,8 @@ public class Vouchers {
     private long totalOn(Account account, EntrySide side) {
         // 구분·상태로 거르지 않는다. 취소된 원전표와 취소 전표가 함께 집계되어야 서로 상쇄된다(4.6).
         return writtenVouchers.stream()
-                .mapToLong(voucher -> voucher.amountOn(account, side))
+                .filter(voucher -> voucher.accountOn(side).equals(account))
+                .mapToLong(voucher -> voucher.amount().value())
                 .sum();
     }
 
