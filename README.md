@@ -44,7 +44,7 @@ JDK 17이 필요합니다.
 | --- | --- | --- |
 | `AccountCode` | 3자리 코드 | 코드 형식 검증, 코드순 정렬 |
 | `AccountType` | 자산·부채·수익·비용 | 분류별 잔액 계산 (자산·비용: 차변 − 대변 / 부채·수익: 대변 − 차변) |
-| `Account` | 코드, 이름, 분류 | 이름 길이 검증 |
+| `Account` | 코드, 이름, 분류 | 이름 길이 검증, 코드로 같은 계정 판단 |
 | `Accounts` | 등록된 계정 목록 | 중복 코드 거절, 코드로 계정 찾기 |
 | `Amount` | 금액 | 1원 ~ 1,000,000,000원 범위 검증 |
 | `Voucher` | 번호, 거래일자, 적요, 차변·대변 계정, 금액, 구분, 상태, 원전표번호 | 같은 계정 거절, 적요 길이 검증, 취소 가능 여부 판단과 취소 전표 생성 |
@@ -52,4 +52,5 @@ JDK 17이 필요합니다.
 | `BalanceSheet` | 자산·부채 계정별 잔액 | 자산·부채 계정만 담기, 분류별 합계 |
 | `InputView`, `InputParser` | - | 입력 해석 (쉼표 분리, 날짜·금액·전표번호 변환) |
 | `OutputView` | - | 출력 형식 (`[ERROR]`, `100,000원`, 원전표번호 없음 `-`) |
-| `MenuController`, `AccountController`, `VoucherController` | - | 메뉴 흐름 연결, 잘못된 입력의 재입력 처리 |
+| `MenuController`, `AccountController`, `VoucherController` | - | 메뉴 흐름 연결, 사전 검사 |
+| `RetryHandler` | - | 잘못된 입력이면 `[ERROR]` 출력 후 같은 안내부터 다시 실행 |
